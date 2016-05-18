@@ -1,19 +1,42 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>TwitterClone</title>
   <%= stylesheet_link_tag    'application', media: 'all' %>
-  <%= javascript_include_tag 'application' %>
-   <!-- Compiled and minified CSS -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/css/materialize.min.css">
-   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <!-- Compiled and minified JavaScript -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/js/materialize.min.js"></script>
-  <%= csrf_meta_tags %>
+    <%= javascript_include_tag 'application' %>
+      <!-- Compiled and minified CSS -->
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/css/materialize.min.css">
+      <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+      <!-- Compiled and minified JavaScript -->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/js/materialize.min.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js"></script>
+      <%= csrf_meta_tags %>
 </head>
-<body>
 
-<%= yield %>
+<body>
+  <div class="right">
+    <%if user_signed_in? %>
+      Bem vindo, 
+      <%= link_to current_user.display_name, '/profile' %>!
+      <%= link_to "Sair", destroy_user_session_path, method: 'DELETE' %>
+    <%else%>
+      Por favor, 
+        <%= link_to "login", new_user_session_path %>
+        ou
+        <%= link_to "registre-se", new_user_registration_path %>
+    <%end%>
+  </div>
+  <p class="notice">
+    <%= notice %>
+  </p>
+  <p class="alert">
+    <%= alert %>
+  </p>
+
+
+  <%= yield %>
 
 </body>
+
 </html>

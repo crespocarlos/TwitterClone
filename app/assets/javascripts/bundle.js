@@ -61,11 +61,11 @@
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
-	var _TweetBox = __webpack_require__(/*! ./TweetBox */ 3);
+	var _TweetBox = __webpack_require__(/*! ./TweetBox */ 2);
 	
 	var _TweetBox2 = _interopRequireDefault(_TweetBox);
 	
-	var _TweetsList = __webpack_require__(/*! ./TweetsList */ 4);
+	var _TweetsList = __webpack_require__(/*! ./TweetsList */ 3);
 	
 	var _TweetsList2 = _interopRequireDefault(_TweetsList);
 	
@@ -76,20 +76,6 @@
 	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-	
-	var mockTweets = [{
-	    id: 1,
-	    name: 'Carlos Crespo',
-	    body: 'Meu #primeiroTweet"'
-	}, {
-	    id: 2,
-	    name: 'Carlos Crespo',
-	    body: 'Meu #segundoTweet"'
-	}, {
-	    id: 3,
-	    name: 'Carlos Crespo',
-	    body: 'Meu #terceiroTweet"'
-	}];
 	
 	var Main = function (_React$Component) {
 	    _inherits(Main, _React$Component);
@@ -104,16 +90,40 @@
 	    }
 	
 	    _createClass(Main, [{
-	        key: 'addTweet',
-	        value: function addTweet(tweetToAdd) {
-	            var newTweetsList = this.state.tweetsList;
-	            newTweetsList.unshift({
-	                id: Date.now(),
-	                name: 'Guest',
-	                body: tweetToAdd
+	        key: 'formattedTweets',
+	        value: function formattedTweets(tweetsList) {
+	            var formattedList = tweetsList.map(function (tweet) {
+	                tweet.formattedDate = moment(tweet.created_at).fromNow();
+	                return tweet;
 	            });
 	
-	            this.setState({ tweetsList: newTweetsList });
+	            return {
+	                tweetsList: formattedList
+	            };
+	        }
+	    }, {
+	        key: 'addTweet',
+	        value: function addTweet(tweetToAdd) {
+	            var _this2 = this;
+	
+	            $.post('./tweets', { body: tweetToAdd }).success(function (savedTweet) {
+	                var newTweetsList = _this2.state.tweetsList;
+	                newTweetsList.unshift(savedTweet);
+	                _this2.setState(_this2.formattedTweets(newTweetsList));
+	            }).error(function (error) {
+	                return console.log;
+	            });
+	        }
+	    }, {
+	        key: 'componentDidMount',
+	        value: function componentDidMount() {
+	            var _this3 = this;
+	
+	            $.ajax('/tweets').success(function (data) {
+	                return _this3.setState(_this3.formattedTweets(data));
+	            }).error(function (error) {
+	                return console.log;
+	            });
 	        }
 	    }, {
 	        key: 'render',
@@ -132,14 +142,16 @@
 	}(React.Component);
 	
 	var documentReady = function documentReady() {
-	    ReactDOM.render(React.createElement(Main, null), document.getElementById('react'));
+	    var reactNode = document.getElementById('react');
+	    if (reactNode) {
+	        ReactDOM.render(React.createElement(Main, null), reactNode);
+	    }
 	};
 	
 	$(documentReady);
 
 /***/ },
-/* 2 */,
-/* 3 */
+/* 2 */
 /*!********************************************************!*\
   !*** ./app/assets/javascripts/components/TweetBox.jsx ***!
   \********************************************************/
@@ -210,7 +222,7 @@
 	exports.default = TweetBox;
 
 /***/ },
-/* 4 */
+/* 3 */
 /*!**********************************************************!*\
   !*** ./app/assets/javascripts/components/TweetsList.jsx ***!
   \**********************************************************/
@@ -226,7 +238,7 @@
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
-	var _Tweet = __webpack_require__(/*! ./Tweet */ 5);
+	var _Tweet = __webpack_require__(/*! ./Tweet */ 4);
 	
 	var _Tweet2 = _interopRequireDefault(_Tweet);
 	
@@ -274,7 +286,7 @@
 	exports.default = TweetsList;
 
 /***/ },
-/* 5 */
+/* 4 */
 /*!*****************************************************!*\
   !*** ./app/assets/javascripts/components/Tweet.jsx ***!
   \*****************************************************/
@@ -309,15 +321,16 @@
 	            return React.createElement(
 	                "li",
 	                { className: "collection-item avatar" },
-	                React.createElement(
-	                    "i",
-	                    { className: "material-icons circle" },
-	                    "person_pin"
-	                ),
+	                React.createElement("img", { className: "circle", src: this.props.gravatar }),
 	                React.createElement(
 	                    "span",
 	                    { className: "title" },
 	                    this.props.name
+	                ),
+	                React.createElement(
+	                    "time",
+	                    null,
+	                    this.props.formattedDate
 	                ),
 	                React.createElement(
 	                    "p",
